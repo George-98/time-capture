@@ -1,0 +1,9 @@
+
+<h1>{{title}}</h1>
+<label for="cars">Choose a task:</label>
+<select name="tasks" id="tasks">
+    {{#each options}}
+        <option value={{this}} >{{this}}</option>
+    {{/each}}
+</select>
+<button>{{timerButtonText}}</button>

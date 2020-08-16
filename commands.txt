@@ -1,0 +1,1 @@
+/home/george/mongodb/bin/mongod --dbpath=/home/george/mongo-data

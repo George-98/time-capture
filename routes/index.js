@@ -7,7 +7,8 @@ router.get('', (req, res) => {
 });
 
 router.post('/start-timer', (req, res)=> {
-    res.send('Timer started');
+    const message = home.load(req, res);
+    return res.send(message);
 });
 
 module.exports = router;

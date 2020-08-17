@@ -5,8 +5,8 @@ $(document).ready(function(){
             url: '/start-timer',
             data: {user: 'George'}
         })
-            .done(function (data) {
-                alert(data);
-            });
+        .done(function (data) {
+            alert(data);
+        });
     })
 });

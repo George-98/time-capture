@@ -6,8 +6,8 @@ router.get('', (req, res) => {
     return home.load(req, res);
 });
 
-router.get('/help', (req, res)=> {
-    res.send('Help!!!');
+router.post('/start-timer', (req, res)=> {
+    res.send('Timer started');
 });
 
 module.exports = router;

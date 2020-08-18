@@ -6,7 +6,9 @@ $(document).ready(function(){
             data: {user: 'George'}
         })
         .done(function (data) {
-            alert(data);
+            if(data){
+                alert(data.message);
+            }
         });
     })
 });

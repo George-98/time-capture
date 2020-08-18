@@ -4,9 +4,9 @@ const MongoClient = mongodb.MongoClient;
 const connectionURL = 'mongodb://127.0.0.1:27017';
 const databaseName = 'time-capture';
 
-const load = (req, res) => {
+const load = (req, res, cb) => {
     if(Object.keys(req.body).length !== 0){
-        return dbConnection(req.body, getCurrentTime());
+        return dbConnection(req.body, getCurrentTime(), cb);
     }
     return renderPage(res);
 }
@@ -26,25 +26,21 @@ const getCurrentTime = () => {
     return new Date();
 }
 
-const dbConnection = ({user}, startDateTime) => {
+const dbConnection = ({user}, startDateTime, cb) => {
     return MongoClient.connect(connectionURL, { useNewUrlParser: true }, (error, client) => {
         if(error){
             console.log(error);
-            return {error: true, message: 'Unable to connect to database!'};
+            return cb({error: true, message: 'Unable to connect to database!'});
         }
 
         const db = client.db(databaseName);
-        return db.times.insertOne(
-            { user, startDateTime, timerActive: true}
-        )
-            .then(() => {
-                db.close();
-                return {error: false, message: 'Document saved!'};
-            })
-            .catch(e => {
-                db.close();
-                return {error: true, message: 'Unable to save document!'};
-            })
+        return db.collection('times').insertOne({ user, startDateTime, timerActive: true})
+        .then(() => {
+            cb({error: false, message: 'Document saved!'});
+        })
+        .catch(e => {
+            cb({error: true, message: 'Unable to save document!'});
+        });
     });
 }
 

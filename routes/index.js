@@ -3,7 +3,9 @@ const express = require('express'),
     home = require('./home');
 
 router.get('', (req, res) => {
-    return home.load(req, res);
+    return home.load(req, res, hbsParams => {
+        return res.render('index', hbsParams);
+    });
 });
 
 router.post('/start-timer', (req, res)=> {

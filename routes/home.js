@@ -8,25 +8,21 @@ const load = (req, res, cb) => {
     if(Object.keys(req.body).length !== 0){
         return dbConnection(req.body, getCurrentTime(), cb);
     }
-    return renderPage(res);
+    return renderPage(cb);
 }
 
-const renderPage = (res) => {
+const renderPage = (cb) => {
     const isTimerRunning = false;
     const timerButtonText = isTimerRunning ? 'stop' : 'start';
-    const options = ['Build a teleportar', 'Build amazon website']
-    return res.render('index', {
-        title: 'Time Capture',
-        timerButtonText,
-        options
-    });
+    const options = ['Build a teleportar', 'Build amazon website'];
+    return cb({title: 'Time Capture', timerButtonText, options});
 }
 
 const getCurrentTime = () => {
     return new Date();
 }
 
-const dbConnection = ({user}, startDateTime, cb) => {
+const dbConnection = (data, startDateTime, cb) => {
     return MongoClient.connect(connectionURL, { useNewUrlParser: true }, (error, client) => {
         if(error){
             console.log(error);
@@ -34,14 +30,28 @@ const dbConnection = ({user}, startDateTime, cb) => {
         }
 
         const db = client.db(databaseName);
-        return db.collection('times').insertOne({ user, startDateTime, timerActive: true})
+
+        if(data.timerButtonText === 'Start'){
+            return addTime(db, data, startDateTime, cb);
+        }
+        else {
+            retrieveTime();
+        }
+    });
+}
+
+const retrieveTime = () => {
+
+}
+
+const addTime = (db, {user}, startDateTime, cb) => {
+    return db.collection('times').insertOne({ user, startDateTime, timerActive: true})
         .then(() => {
-            cb({error: false, message: 'Document saved!'});
+            return cb({error: false, message: 'Document saved!', buttonText: 'Stop'});
         })
         .catch(e => {
-            cb({error: true, message: 'Unable to save document!'});
+            return cb({error: true, message: 'Unable to save document!'});
         });
-    });
 }
 
 module.exports = {load};

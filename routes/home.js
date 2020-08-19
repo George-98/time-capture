@@ -13,7 +13,7 @@ const load = (req, res, cb) => {
 
 const renderPage = (cb) => {
     const isTimerRunning = false;
-    const timerButtonText = isTimerRunning ? 'stop' : 'start';
+    const timerButtonText = isTimerRunning ? 'Stop' : 'Start';
     const options = ['Build a teleportar', 'Build amazon website'];
     return cb({title: 'Time Capture', timerButtonText, options});
 }
@@ -32,25 +32,38 @@ const dbConnection = (data, startDateTime, cb) => {
         const db = client.db(databaseName);
 
         if(data.timerButtonText === 'Start'){
-            return addTime(db, data, startDateTime, cb);
+            return setStartTime(db, data, startDateTime, cb);
         }
         else {
-            retrieveTime();
+            retrieveTime(db, data, cb);
         }
     });
 }
 
-const retrieveTime = () => {
-
+const retrieveTime = (db, {user}, cb) => {
+    return db.collection('times').findOne({timerActive: true}, (e, result) => {
+        return db.collection('times').updateOne(result, {$set :{timerActive : false, endDateTime: getCurrentTime()}})
+            .then(() => {
+                return cb({error: false, message: 'Document updated!', buttonText: 'Start'});
+            })
+            .catch(e => {
+                return cb({error: true, message: `Unable to save document! ${e}`});
+            });
+    });
 }
 
-const addTime = (db, {user}, startDateTime, cb) => {
-    return db.collection('times').insertOne({ user, startDateTime, timerActive: true})
+const setStartTime = (db, {user}, startDateTime, cb) => {
+    const newDocument = { user, startDateTime, timerActive: true}
+    return addData(db, 'times', newDocument, cb);
+}
+
+const addData = (db, collection, newDocument, cb) => {
+    return db.collection(collection).insertOne(newDocument)
         .then(() => {
             return cb({error: false, message: 'Document saved!', buttonText: 'Stop'});
         })
         .catch(e => {
-            return cb({error: true, message: 'Unable to save document!'});
+            return cb({error: true, message: `Unable to save document! ${e}`});
         });
 }
 
